@@ -5,6 +5,8 @@ import utime
 import re
 import _thread
 import gc
+import ubinascii
+import uzlib
 
 WIDTH  = 128 # SSD1306 horizontal resolution
 HEIGHT = 64   # SSD1306 vertical resolution
@@ -80,6 +82,18 @@ def ReadCommand(cmd):
             except:
                 second = 0
             rtc.datetime((year, month, day, date, hour, minute, second, 0))
+    elif OPCODE == "IMAGE":
+        b64 = cmdArgs[1]
+        width = int(cmdArgs[2])
+        height = int(cmdArgs[3])
+        pos_x = int(cmdArgs[4])
+        pos_y = int(cmdArgs[5])
+        
+        zlib = ubinascii.a2b_base64(b64)
+        imageData = uzlib.decompress(zlib)
+        print(imageData)
+        ui.printGraphic(imageData, width, height, pos_x, pos_y)
+        oled.show()
             
 cmdList = []
 
@@ -107,6 +121,7 @@ def Print():
             
         utime.sleep(0.05)
         gc.collect()
+        print(gc.mem_free())
                 
             
 thread1 = _thread.start_new_thread(Print,())
