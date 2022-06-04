@@ -59,6 +59,7 @@ def ReadCommand(cmd):
         mode = 1
         oled.show()
     elif OPCODE == "WRITE":
+        oled.fill(0)
         pattern = '^(\S*) \"(.*)\" ([0-9]*) ([0-9]*) ([0-9]*)$'
         instruction = re.search(pattern, cmd)
         strToPrint = instruction.group(2)
@@ -83,16 +84,21 @@ def ReadCommand(cmd):
                 second = 0
             rtc.datetime((year, month, day, date, hour, minute, second, 0))
     elif OPCODE == "IMAGE":
+        
         b64 = cmdArgs[1]
         width = int(cmdArgs[2])
         height = int(cmdArgs[3])
-        pos_x = int(cmdArgs[4])
-        pos_y = int(cmdArgs[5])
+        if (cmdArgs[4] == 'n'):
+            pos_x = None
+        else: pos_x = int(float(cmdArgs[4]))
         
+        #if (cmdArgs[5] == 'n'):
+        #    pos_y = None
+        #else: pos_y = int(float(cmdArgs[5]))
         zlib = ubinascii.a2b_base64(b64)
         imageData = uzlib.decompress(zlib)
         print(imageData)
-        ui.printGraphic(imageData, width, height, pos_x, pos_y)
+        ui.printGraphic(imageData, width, height, pos_x, None)
         oled.show()
             
 cmdList = []
@@ -115,13 +121,14 @@ def Print():
             
         if len(cmdList) > 0:
             ReadCommand(cmdList[0])
+            bt.write("1\r\n")
             cmdList.pop(0)
             
         oled.show()
             
         utime.sleep(0.05)
         gc.collect()
-        print(gc.mem_free())
+        #print(gc.mem_free())
                 
             
 thread1 = _thread.start_new_thread(Print,())
@@ -137,4 +144,5 @@ while True:
         else:
            print(command)
            cmdList.append(command)
+           #bt.write("Received\r\n")
            command = ''
