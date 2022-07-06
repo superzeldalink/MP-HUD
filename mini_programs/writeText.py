@@ -23,7 +23,7 @@ def writeTextWrap(str, size, pos_x, pos_y, width = WIDTH, height = 100):
     elif size <= 15: size = 15
     else: size = 20
         
-    strings = str.split(' ')
+    strings = str.replace('\n', ' ').split(' ')
     strToPrint = ""
     line = 0
     for i in range(len(strings)):
